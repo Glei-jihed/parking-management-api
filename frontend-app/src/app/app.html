@@ -1,0 +1,115 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Parking Reservation System</p>
+      <h1>{{ title() }}</h1>
+      <p class="subtitle">
+        Visualize parking spots and their current status for a given date and slot.
+      </p>
+    </div>
+
+    <div class="backend-status-card">
+      <span class="backend-label">Backend</span>
+      <span class="backend-value" [class.up]="backendStatus() === 'UP'" [class.down]="backendStatus() !== 'UP'">
+        {{ backendStatus() }}
+      </span>
+    </div>
+  </header>
+
+  <section class="filters-card">
+    <div class="filters-grid">
+      <div class="field">
+        <label for="date">Date</label>
+        <input
+          id="date"
+          type="date"
+          [value]="selectedDate()"
+          (change)="onDateChange($event)"
+        />
+      </div>
+
+      <div class="field">
+        <label for="slot">Slot</label>
+        <select
+          id="slot"
+          [value]="selectedSlot()"
+          (change)="onSlotChange($event)"
+        >
+          <option value="MORNING">Morning</option>
+          <option value="AFTERNOON">Afternoon</option>
+          <option value="FULL_DAY">Full day</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card">
+      <span class="stat-label">Total spots</span>
+      <strong class="stat-value">{{ parkingSpots().length }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Available</span>
+      <strong class="stat-value available">{{ getAvailableCount() }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Reserved</span>
+      <strong class="stat-value reserved">{{ getReservedCount() }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Checked-in</span>
+      <strong class="stat-value checked-in">{{ getCheckedInCount() }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">Electric spots</span>
+      <strong class="stat-value electric">{{ getElectricCount() }}</strong>
+    </article>
+  </section>
+
+  <section class="legend">
+    <div class="legend-item"><span class="legend-dot available"></span><span>Available</span></div>
+    <div class="legend-item"><span class="legend-dot reserved"></span><span>Reserved</span></div>
+    <div class="legend-item"><span class="legend-dot checked-in"></span><span>Checked-in</span></div>
+    <div class="legend-item"><span class="legend-bolt">⚡</span><span>Electric spot</span></div>
+  </section>
+
+  @if (loadingParkingSpots()) {
+    <section class="message-card">
+      <p>Loading parking spots...</p>
+    </section>
+  } @else if (errorMessage()) {
+    <section class="message-card error">
+      <p>{{ errorMessage() }}</p>
+    </section>
+  } @else {
+    <section class="parking-grid">
+      @for (spot of parkingSpots(); track spot.code) {
+        <article class="spot-card" [class.electric-border]="spot.electric">
+          <div class="spot-top">
+            <h3>{{ spot.code }}</h3>
+            @if (spot.electric) {
+              <span class="electric-badge">⚡ Electric</span>
+            }
+          </div>
+
+          <p class="spot-meta">Row {{ spot.rowLabel }} · Spot {{ spot.spotNumber }}</p>
+
+          <div
+            class="status-badge"
+            [class.available]="spot.status === 'AVAILABLE'"
+            [class.reserved]="spot.status === 'RESERVED'"
+            [class.checked-in]="spot.status === 'CHECKED_IN'"
+          >
+            {{ getStatusLabel(spot.status) }}
+          </div>
+        </article>
+      }
+    </section>
+  }
+
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,20 @@
+# ======================
+# BACKEND (Spring Boot)
+# ======================
+backend/target/
+*.log
+
+# ======================
+# FRONTEND (Angular)
+# ======================
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# ======================
+# SYSTEM
+# ======================
+.DS_Store
+.idea/
+.vscode/
