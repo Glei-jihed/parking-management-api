@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-docker compose up --build
+docker-compose up --build
