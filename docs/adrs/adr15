@@ -1,0 +1,24 @@
+# 15. Architecture Globale : Découplage Front/Back et Backend Monolithe Modulaire
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Le délai est très court (4 sprints d'une demi-journée). Une architecture en microservices introduirait trop de complexité réseau, d'orchestration et de déploiement. Cependant, nous voulons éviter l'écueil du "monolithe classique" (rendu serveur couplé à la logique métier) pour permettre à l'équipe de travailler en parallèle sur l'interface et sur l'API sans générer de conflits.
+
+## Decision
+
+Nous adopterons une architecture strictement découplée :
+1. Une application Frontend indépendante (SPA).
+2. Une application Backend (API REST). 
+
+Le Backend sera construit selon le motif du "Monolithe Modulaire" : un seul livrable (un seul conteneur), mais avec une séparation stricte du code par domaine métier (packages distincts pour `users`, `reservations`, `parking-lots`, `notifications`) qui ne communiquent entre eux que via des interfaces claires. Donc architecture hexagonale.
+
+## Consequences
+
+- Positif : Séparation claire des responsabilités entre le Frontend et le Backend. Permet le travail en parallèle de l'équipe. Le déploiement du backend reste simple (un seul conteneur) tout en gardant un code propre et prêt à être découpé en microservices plus tard si besoin.
+- Négatif : Nécessite de gérer la communication inter-domaines (CORS) entre le conteneur Front et le conteneur Back, et d'orchestrer le lancement de deux applications distinctes en local.

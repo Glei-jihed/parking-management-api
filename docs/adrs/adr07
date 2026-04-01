@@ -1,0 +1,20 @@
+# 07. Message Queue : RabbitMQ
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+L'envoi d'emails de confirmation doit être asynchrone pour ne pas bloquer l'utilisateur lors de sa réservation (découplage demandé par le PO).
+
+## Decision
+
+Nous utiliserons RabbitMQ comme message broker, géré via Spring AMQP.
+
+## Consequences
+
+- Positif : Fiable, intégration quasi-native avec Spring Boot (annotations `@RabbitListener`).
+- Négatif : Ajoute un composant d'infrastructure supplémentaire à orchestrer avec Docker.

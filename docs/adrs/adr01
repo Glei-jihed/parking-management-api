@@ -1,0 +1,20 @@
+# 01. Record architecture decisions
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Nous devons garder une trace des décisions architecturales prises sur ce projet pour faciliter l'intégration de nouveaux développeurs et justifier nos choix auprès du Product Owner.
+
+## Decision
+
+Nous utiliserons les Architecture Decision Records (ADR), selon le modèle minimaliste de Michael Nygard.
+
+## Consequences
+
+- Positif : Historique clair et standardisé des choix techniques.
+- Négatif : Nécessite une rigueur de l'équipe pour les rédiger et les maintenir à jour.

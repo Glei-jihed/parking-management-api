@@ -1,0 +1,20 @@
+# 06. ORM : Spring Data JPA (Hibernate)
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Écrire des requêtes SQL natives pour le CRUD de base (Créer, Lire, Mettre à jour, Supprimer des réservations) prend du temps et augmente le risque d'erreurs.
+
+## Decision
+
+Nous utiliserons Spring Data JPA (basé sur Hibernate) pour la persistance des données.
+
+## Consequences
+
+- Positif : Mapping objet-relationnel automatisé, création de requêtes via le nommage des méthodes d'interface (ex: `findByUserIdAndDate`).
+- Négatif : Le "N+1 query problem" doit être surveillé, nécessite de bien comprendre le cycle de vie des entités.

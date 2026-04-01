@@ -1,0 +1,20 @@
+# 02. Architecture Globale : Monolithe Modulaire
+
+Date: 2026-03-30
+
+## Status
+
+Superseded by #adr15
+
+## Context
+
+Le délai est très court (4 sprints d'une demi-journée). Une architecture en microservices introduirait trop de complexité réseau, d'orchestration et de déploiement pour une équipe qui doit livrer vite.
+
+## Decision
+
+Nous adopterons une architecture de monolithe modulaire avec une séparation stricte des packages par domaine (users, reservations, parking-lots, notifications).
+
+## Consequences
+
+- Positif : Déploiement simplifié (un seul conteneur backend), refactoring facile.
+- Négatif : Si l'application grandit massivement, elle pourrait devenir difficile à scaler par composants indépendants.

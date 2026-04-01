@@ -1,0 +1,20 @@
+# 14. Conteneurisation et Scripts d'automatisation
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Pour faciliter le travail en groupe et répondre aux exigences du PO, l'environnement doit être isolé et scripté.
+
+## Decision
+
+Nous utiliserons `docker-compose` pour packager le Frontend, le Backend, PostgreSQL et RabbitMQ. Les commandes complexes seront encapsulées dans des scripts bash (`build.sh`, `run.sh`, `test.sh`) à la racine.
+
+## Consequences
+
+- Positif : "Ça marche sur ma machine" garanti. Processus de run et de test trivial pour tous les membres de l'équipe.
+- Négatif : Les membres sous Windows devront utiliser Git Bash ou WSL pour exécuter les scripts `.sh`.

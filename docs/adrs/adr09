@@ -1,0 +1,20 @@
+# 09. Tâche planifiée pour l'annulation (11h00) : Spring @Scheduled
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Le PO exige que si un "check-in" n'est pas fait avant 11h00, la place redevient disponible.
+
+## Decision
+
+Nous utiliserons le planificateur intégré de Spring avec l'annotation `@Scheduled(cron = "0 0 11 * * *")` sur une méthode de service qui annulera les réservations non confirmées du jour.
+
+## Consequences
+
+- Positif : Extrêmement simple à mettre en place, pas d'outil externe (comme un cron Linux) nécessaire.
+- Négatif : Si l'application tourne en plusieurs instances, la tâche sera exécutée plusieurs fois (nécessiterait un outil comme ShedLock, mais non pertinent pour notre monolithe actuel).

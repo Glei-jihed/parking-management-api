@@ -1,0 +1,20 @@
+# 03. Backend Framework : Java Spring Boot
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Nous avons besoin d'un backend robuste capable de gérer une API REST, des tâches planifiées, la sécurité, et une connexion à une file de messages, le tout de manière fiable.
+
+## Decision
+
+Nous développerons l'API avec Java et Spring Boot.
+
+## Consequences
+
+- Positif : Écosystème riche ("batteries included"), injection de dépendances puissante, standard très demandé sur le marché et équipe àl'aise avec Spring.
+- Négatif : Démarrage de l'application légèrement plus lent et plus complexe à mettre en place qu'un typescript.

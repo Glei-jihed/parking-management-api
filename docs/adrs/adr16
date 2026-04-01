@@ -1,0 +1,19 @@
+# 16. Frontend Framework : Angular
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+L'application doit être utilisée par des non-techniciens, s'adapter aux profils, et être facilement consultable sur mobile pour scanner les QR codes. Spring Boot offre du rendu serveur (Thymeleaf), mais une approche découplée offre une meilleure expérience mobile ainsi que des theme pré enregistrer ce qui peux nous faire gagner du temps précieux.
+
+## Decision
+
+Nous créerons une page web avec Angular qui communiquera avec l'API Spring Boot via des appels REST.
+
+## Consequences
+
+- Positif : Framework robuste et structurant ("opinionated") qui inclut nativement tout le nécessaire (routage, client HTTP, gestion des formulaires). L'utilisation de TypeScript et l'architecture basée sur l'injection de dépendances font un excellent écho à Java Spring Boot, ce qui facilite le travail des développeurs full-stack sur le projet et l'équipe plus à l'aise avec cet technologie.

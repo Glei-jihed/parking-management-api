@@ -1,0 +1,20 @@
+# 10. Check-in par QR Code : Deep Linking vers l'API
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Chaque place de parking aura un QR code imprimé. Les utilisateurs doivent le scanner pour valider leur présence.
+
+## Decision
+
+Le QR code contiendra une URL pointant vers le Frontend (ex: `https://app/checkin/A01`). Le front appellera ensuite l'API REST sécurisée avec le token de l'utilisateur pour valider la place.
+
+## Consequences
+
+- Positif : L'utilisateur utilise la session (JWT) déjà active sur son navigateur mobile.
+- Négatif : L'application web doit être accessible via un réseau mobile dans le parking.

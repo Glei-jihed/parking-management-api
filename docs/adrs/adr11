@@ -1,0 +1,20 @@
+# 11. Initialisation des données (Seeding) : Flyway
+
+Date: 2026-03-30
+
+## Status
+
+Deprecated
+
+## Context
+
+Le système s'appuie sur une structure physique de 60 places (A01 à F10) dont certaines sont électriques. Ces données doivent exister au démarrage.
+
+## Decision
+
+Nous utiliserons Flyway pour gérer les migrations de base de données et insérer les places par défaut via un script SQL initial.
+
+## Consequences
+
+- Positif : Contrôle de version strict de la base de données, l'état initial est garanti pour tous les développeurs.
+- Négatif : Nécessite d'écrire du SQL natif pour l'initialisation.

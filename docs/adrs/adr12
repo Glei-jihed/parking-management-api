@@ -1,0 +1,20 @@
+# 12. Stratégie de tests : Testcontainers + JUnit 5
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Le PO demande de "vrais tests" et pas de simples `assertTrue(true)`.
+
+## Decision
+
+Nous utiliserons JUnit 5 et Testcontainers pour nos tests d'intégration. Testcontainers lancera de vrais conteneurs Docker (PostgreSQL, RabbitMQ) pendant la phase de test.
+
+## Consequences
+
+- Positif : Tests extrêmement fiables car ils tournent sur de vrais services plutôt que des bases de données en mémoire (H2) dont le comportement SQL peut différer.
+- Négatif : Les tests sont un peu plus lents à exécuter car ils doivent démarrer des conteneurs.

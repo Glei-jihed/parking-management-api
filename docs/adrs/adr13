@@ -1,0 +1,20 @@
+# 13. Historique et Suppression : Soft Delete
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+Le PO demande des statistiques précises (places réservées mais non utilisées, etc.) et de garder la trace de toutes les réservations.
+
+## Decision
+
+Nous ne ferons aucune suppression physique (DELETE) en base de données. Nous utiliserons un statut explicite pour les réservations (`ACTIVE`, `CANCELLED_11AM`, `COMPLETED`) et un système de "Soft Delete" pour les utilisateurs.
+
+## Consequences
+
+- Positif : Historique complet préservé, idéal pour le dashboard manager.
+- Négatif : Le volume de données augmentera continuellement, les requêtes doivent toujours filtrer le statut.

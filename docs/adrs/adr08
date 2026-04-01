@@ -1,0 +1,20 @@
+# 08. Authentification et Autorisation : Spring Security + JWT
+
+Date: 2026-03-30
+
+## Status
+
+Accepted
+
+## Context
+
+L'API REST est "stateless" (sans session serveur). Nous devons authentifier les employés, secrétaires et managers de manière sécurisée.
+
+## Decision
+
+Nous utiliserons Spring Security avec des JSON Web Tokens (JWT). Le rôle de l'utilisateur sera inclus dans le payload du token.
+
+## Consequences
+
+- Positif : Sécurité robuste, API totalement sans état, autorisations faciles avec `@PreAuthorize("hasRole('MANAGER')")`.
+- Négatif : La configuration de Spring Security peut être complexe et verbeuse pour les débutants.

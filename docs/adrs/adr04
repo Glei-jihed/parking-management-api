@@ -1,0 +1,20 @@
+# 04. Frontend Framework : React (SPA)
+
+Date: 2026-03-30
+
+## Status
+
+Superseded by #adr16
+
+## Context
+
+L'application doit être utilisée par des non-techniciens, s'adapter aux profils, et être facilement consultable sur mobile pour scanner les QR codes. Spring Boot offre du rendu serveur (Thymeleaf), mais une approche découplée offre une meilleure expérience mobile.
+
+## Decision
+
+Nous créerons une Single Page Application (SPA) avec React (et Vite pour le build) qui communiquera avec l'API Spring Boot via REST.
+
+## Consequences
+
+- Positif : Interface réactive, écosystème de composants riche, séparation claire des responsabilités front/back.
+- Négatif : Nécessite de gérer deux projets distincts (et deux conteneurs) au lieu d'un seul avec Thymeleaf.
