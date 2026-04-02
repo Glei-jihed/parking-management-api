@@ -8,13 +8,7 @@ public class ParkingSpotView {
     private final boolean electric;
     private final ParkingSpotStatus status;
 
-    public ParkingSpotView(
-            String code,
-            String rowLabel,
-            int spotNumber,
-            boolean electric,
-            ParkingSpotStatus status
-    ) {
+    public ParkingSpotView(String code, String rowLabel, int spotNumber, boolean electric, ParkingSpotStatus status) {
         this.code = code;
         this.rowLabel = rowLabel;
         this.spotNumber = spotNumber;

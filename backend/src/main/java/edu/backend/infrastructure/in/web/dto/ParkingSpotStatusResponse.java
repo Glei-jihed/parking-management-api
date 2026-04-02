@@ -6,5 +6,4 @@ public record ParkingSpotStatusResponse(
         int spotNumber,
         boolean electric,
         String status
-) {
-}
+) {}

@@ -1,11 +1,6 @@
 package edu.backend.infrastructure.out.persistence;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,8 +19,11 @@ public class ReservationJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "employee_email", nullable = false)
-    private String employeeEmail;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "user_email", nullable = false)
+    private String userEmail;
 
     @Column(name = "reservation_date", nullable = false)
     private LocalDate reservationDate;
@@ -38,6 +36,12 @@ public class ReservationJpaEntity {
 
     @Column(name = "parking_spot_code", nullable = false)
     private String parkingSpotCode;
+
+    @Column(name = "electric_required", nullable = false)
+    private boolean electricRequired;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "check_in_time")
     private LocalDateTime checkInTime;

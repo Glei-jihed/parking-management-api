@@ -2,11 +2,11 @@ package edu.backend.domain.model;
 
 public class ParkingSpot {
 
-    private final Long id;
-    private final String code;
-    private final String rowLabel;
-    private final int spotNumber;
-    private final boolean electric;
+    private Long id;
+    private String code;
+    private String rowLabel;
+    private int spotNumber;
+    private boolean electric;
 
     public ParkingSpot(Long id, String code, String rowLabel, int spotNumber, boolean electric) {
         this.id = id;

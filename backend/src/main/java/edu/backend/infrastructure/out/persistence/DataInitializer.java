@@ -1,29 +1,30 @@
 package edu.backend.infrastructure.out.persistence;
 
+import edu.backend.infrastructure.out.security.security.BCryptPasswordHasherAdapter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final ParkingSpotJpaRepository parkingSpotJpaRepository;
-    private final ReservationJpaRepository reservationJpaRepository;
+    private final UserJpaRepository userJpaRepository;
+    private final BCryptPasswordHasherAdapter passwordHasher;
 
     public DataInitializer(
             ParkingSpotJpaRepository parkingSpotJpaRepository,
-            ReservationJpaRepository reservationJpaRepository
+            UserJpaRepository userJpaRepository,
+            BCryptPasswordHasherAdapter passwordHasher
     ) {
         this.parkingSpotJpaRepository = parkingSpotJpaRepository;
-        this.reservationJpaRepository = reservationJpaRepository;
+        this.userJpaRepository = userJpaRepository;
+        this.passwordHasher = passwordHasher;
     }
 
     @Override
     public void run(String... args) {
         seedParkingSpots();
-        seedReservations();
+        seedUsers();
     }
 
     private void seedParkingSpots() {
@@ -38,45 +39,27 @@ public class DataInitializer implements CommandLineRunner {
                 entity.setRowLabel(String.valueOf(row));
                 entity.setSpotNumber(number);
                 entity.setElectric(row == 'A' || row == 'F');
-
                 parkingSpotJpaRepository.save(entity);
             }
         }
     }
 
-    private void seedReservations() {
-        if (reservationJpaRepository.count() > 0) {
+    private void seedUsers() {
+        if (userJpaRepository.count() > 0) {
             return;
         }
 
-        LocalDate today = LocalDate.now();
+        userJpaRepository.save(buildUser("employee@parking.local", "password", "EMPLOYEE"));
+        userJpaRepository.save(buildUser("secretary@parking.local", "password", "SECRETARY"));
+        userJpaRepository.save(buildUser("manager@parking.local", "password", "MANAGER"));
+    }
 
-        ReservationJpaEntity reservedAfternoon = new ReservationJpaEntity();
-        reservedAfternoon.setEmployeeEmail("alice@company.com");
-        reservedAfternoon.setReservationDate(today);
-        reservedAfternoon.setSlot("AFTERNOON");
-        reservedAfternoon.setStatus("RESERVED");
-        reservedAfternoon.setParkingSpotCode("A01");
-        reservedAfternoon.setCheckInTime(null);
-
-        ReservationJpaEntity checkedInMorning = new ReservationJpaEntity();
-        checkedInMorning.setEmployeeEmail("bob@company.com");
-        checkedInMorning.setReservationDate(today);
-        checkedInMorning.setSlot("MORNING");
-        checkedInMorning.setStatus("CHECKED_IN");
-        checkedInMorning.setParkingSpotCode("B03");
-        checkedInMorning.setCheckInTime(LocalDateTime.now().minusHours(1));
-
-        ReservationJpaEntity fullDayReserved = new ReservationJpaEntity();
-        fullDayReserved.setEmployeeEmail("manager@company.com");
-        fullDayReserved.setReservationDate(today);
-        fullDayReserved.setSlot("FULL_DAY");
-        fullDayReserved.setStatus("RESERVED");
-        fullDayReserved.setParkingSpotCode("F02");
-        fullDayReserved.setCheckInTime(null);
-
-        reservationJpaRepository.save(reservedAfternoon);
-        reservationJpaRepository.save(checkedInMorning);
-        reservationJpaRepository.save(fullDayReserved);
+    private UserJpaEntity buildUser(String email, String password, String role) {
+        UserJpaEntity user = new UserJpaEntity();
+        user.setEmail(email);
+        user.setPassword(passwordHasher.hash(password));
+        user.setRole(role);
+        user.setActive(true);
+        return user;
     }
 }

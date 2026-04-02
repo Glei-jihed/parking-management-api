@@ -1,0 +1,154 @@
+<div class="container page">
+  <header class="header">
+    <div>
+      <p class="eyebrow">Employee space</p>
+      <h1 class="section-title">My parking dashboard</h1>
+      <p class="subtitle">Reserve a parking spot, check in, and track your reservations.</p>
+    </div>
+
+    <div class="card backend-card">
+      <span class="stat-label">Backend</span>
+      <strong class="stat-value">{{ backendStatus() }}</strong>
+    </div>
+  </header>
+
+  @if (success()) {
+    <div class="message success">{{ success() }}</div>
+  }
+
+  @if (error()) {
+    <div class="message error">{{ error() }}</div>
+  }
+
+  <section class="stats-grid">
+    <article class="card stat-card">
+      <span class="stat-label">Total spots</span>
+      <strong class="stat-value">{{ parkingSpots().length }}</strong>
+    </article>
+
+    <article class="card stat-card">
+      <span class="stat-label">Available</span>
+      <strong class="stat-value">{{ getAvailableCount() }}</strong>
+    </article>
+
+    <article class="card stat-card">
+      <span class="stat-label">Reserved</span>
+      <strong class="stat-value">{{ getReservedCount() }}</strong>
+    </article>
+
+    <article class="card stat-card">
+      <span class="stat-label">Checked-in</span>
+      <strong class="stat-value">{{ getCheckedInCount() }}</strong>
+    </article>
+  </section>
+
+  <section class="grid grid-2 main-grid">
+    <div class="card panel">
+      <h2>Reserve a spot</h2>
+
+      <div class="grid grid-2">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" [value]="selectedDate()" (change)="onDateChange($event)" />
+        </div>
+
+        <div class="field">
+          <label>Slot</label>
+          <select [value]="selectedSlot()" (change)="onSlotChange($event)">
+            <option value="MORNING">Morning</option>
+            <option value="AFTERNOON">Afternoon</option>
+            <option value="FULL_DAY">Full day</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="checkbox">
+        <input type="checkbox" [checked]="needsElectric()" (change)="onElectricChange($event)" />
+        I need an electric / hybrid spot
+      </label>
+
+      <button class="btn btn-primary" (click)="reserve()">Create reservation</button>
+
+      <div class="message-box">
+        <strong>Rule reminders</strong>
+        <ul>
+          <li>Employees can reserve up to 5 working days.</li>
+          <li>Managers can reserve up to 30 days.</li>
+          <li>Rows A and F are electric spots only.</li>
+          <li>Morning and full-day reservations require check-in before 11 AM.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card panel">
+      <h2>Parking availability</h2>
+
+      @if (loadingSpots()) {
+        <p>Loading parking spots...</p>
+      } @else {
+        <div class="spots-grid">
+          @for (spot of parkingSpots(); track spot.code) {
+            <article class="spot-card" [class.electric]="spot.electric">
+              <div class="spot-top">
+                <strong>{{ spot.code }}</strong>
+                @if (spot.electric) {
+                  <span class="badge badge-purple">Electric</span>
+                }
+              </div>
+
+              <div class="spot-meta">Row {{ spot.rowLabel }} · Spot {{ spot.spotNumber }}</div>
+
+              <span [class]="statusClass(spot.status)">
+                {{ spot.status }}
+              </span>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="card panel">
+    <h2>My reservations</h2>
+
+    @if (loadingReservations()) {
+      <p>Loading reservations...</p>
+    } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+          <tr>
+            <th>Date</th>
+            <th>Slot</th>
+            <th>Status</th>
+            <th>Spot</th>
+            <th>Electric</th>
+            <th>Check-in</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (reservation of myReservations(); track reservation.id) {
+              <tr>
+                <td>{{ reservation.reservationDate }}</td>
+                <td>{{ reservation.slot }}</td>
+                <td>
+                  <span [class]="statusClass(reservation.status)">{{ reservation.status }}</span>
+                </td>
+                <td>{{ reservation.parkingSpotCode }}</td>
+                <td>{{ reservation.electricRequired ? 'Yes' : 'No' }}</td>
+                <td>{{ reservation.checkInTime || '-' }}</td>
+                <td class="actions">
+                  @if (reservation.status === 'RESERVED') {
+                    <button class="btn btn-success" (click)="checkIn(reservation.id)">Check-in</button>
+                    <button class="btn btn-danger" (click)="cancelReservation(reservation.id)">Cancel</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

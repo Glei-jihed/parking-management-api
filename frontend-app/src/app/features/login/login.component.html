@@ -1,0 +1,32 @@
+<div class="container login-page">
+  <div class="card login-card">
+    <p class="eyebrow">Parking Reservation System</p>
+    <h1>Login</h1>
+    <p class="subtitle">Connect with your parking account.</p>
+
+    <div class="field">
+      <label>Email</label>
+      <input [(ngModel)]="email" type="email" />
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input [(ngModel)]="password" type="password" />
+    </div>
+
+    <button class="btn btn-primary full-width" (click)="submit()" [disabled]="loading()">
+      {{ loading() ? 'Signing in...' : 'Login' }}
+    </button>
+
+    @if (error()) {
+      <div class="message error">{{ error() }}</div>
+    }
+
+    <div class="demo-box">
+      <strong>Demo accounts</strong>
+      <p>employee@parking.local / password</p>
+      <p>secretary@parking.local / password</p>
+      <p>manager@parking.local / password</p>
+    </div>
+  </div>
+</div>

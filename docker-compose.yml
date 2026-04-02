@@ -1,7 +1,14 @@
+version: "3.9"
+
 services:
+
+  # =========================
+  # DATABASE
+  # =========================
   postgres:
     image: postgres:16
     container_name: parking-db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: parking_management
       POSTGRES_USER: parking_user
@@ -10,28 +17,57 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parking_user -d parking_management"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  # =========================
+  # BACKEND (SPRING BOOT)
+  # =========================
   backend:
     build:
       context: ./backend
     container_name: parking-backend
+    restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/parking_management
       SPRING_DATASOURCE_USERNAME: parking_user
       SPRING_DATASOURCE_PASSWORD: parking_pass
+
+      # Hibernate / JPA
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+
+      # Server
+      SERVER_PORT: 8080
+
+      # Timezone (important pour dates)
+      TZ: Europe/Paris
+
     ports:
       - "8080:8080"
 
+  # =========================
+  # FRONTEND (ANGULAR + NGINX)
+  # =========================
   frontend:
     build:
       context: ./frontend-app
     container_name: parking-frontend
+    restart: unless-stopped
     depends_on:
       - backend
     ports:
       - "4200:80"
+
+    # 🔥 IMPORTANT: permet au front d'appeler le backend
+    environment:
+      - API_URL=http://backend:8080
 
 volumes:
   postgres_data:

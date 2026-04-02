@@ -5,8 +5,7 @@ import edu.backend.infrastructure.in.web.dto.ParkingSpotStatusResponse;
 
 public class WebMapper {
 
-    private WebMapper() {
-    }
+    private WebMapper() {}
 
     public static ParkingSpotStatusResponse toParkingSpotStatusResponse(ParkingSpotView view) {
         return new ParkingSpotStatusResponse(
