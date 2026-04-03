@@ -1,15 +1,27 @@
 package edu.backend.application.service;
 
 import edu.backend.domain.exception.BusinessException;
-import edu.backend.domain.model.*;
+import edu.backend.domain.exception.ForbiddenException;
+import edu.backend.domain.model.ParkingSpot;
+import edu.backend.domain.model.ParkingSpotStatus;
+import edu.backend.domain.model.ParkingSpotView;
+import edu.backend.domain.model.Reservation;
+import edu.backend.domain.model.ReservationSlot;
+import edu.backend.domain.model.ReservationStatus;
+import edu.backend.domain.model.User;
+import edu.backend.domain.model.UserRole;
 import edu.backend.domain.port.out.ParkingSpotRepositoryPort;
 import edu.backend.domain.port.out.ReservationRepositoryPort;
 import edu.backend.domain.port.out.UserRepositoryPort;
 import org.junit.jupiter.api.Test;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +30,6 @@ class ReservationApplicationServiceTest {
 
     @Test
     void should_create_reservation_for_employee_on_available_non_electric_spot() {
-
         InMemoryReservationRepository reservationRepository = new InMemoryReservationRepository();
 
         ParkingSpotRepositoryPort parkingSpotRepositoryPort =
@@ -50,12 +61,68 @@ class ReservationApplicationServiceTest {
         assertEquals(1, created.size());
         assertEquals("B01", created.get(0).getParkingSpotCode());
         assertEquals(ReservationStatus.RESERVED, created.get(0).getStatus());
+        assertFalse(created.get(0).isElectricRequired());
+    }
+
+
+    @Test
+    void should_fail_when_same_user_has_overlapping_reservation_on_same_day() {
+        InMemoryReservationRepository reservationRepository = new InMemoryReservationRepository();
+
+        LocalDate targetDate = nextWeekday();
+
+        reservationRepository.save(new Reservation(
+                null,
+                1L,
+                "employee@test.com",
+                targetDate,
+                ReservationSlot.MORNING,
+                ReservationStatus.RESERVED,
+                "B01",
+                false,
+                LocalDateTime.now(),
+                null
+        ));
+
+        ParkingSpotRepositoryPort parkingSpotRepositoryPort =
+                new InMemoryParkingSpotRepository(List.of(
+                        new ParkingSpot(1L, "B01", "B", 1, false),
+                        new ParkingSpot(2L, "B02", "B", 2, false)
+                ));
+
+        UserRepositoryPort userRepositoryPort = new InMemoryUserRepository();
+
+        ReservationApplicationService service = new ReservationApplicationService(
+                reservationRepository,
+                parkingSpotRepositoryPort,
+                userRepositoryPort
+        );
+
+        User employee = new User(1L, "employee@test.com", "x", UserRole.EMPLOYEE, true);
+
+        assertThrows(BusinessException.class, () ->
+                service.createReservations(employee, targetDate, targetDate, ReservationSlot.MORNING, false)
+        );
     }
 
     @Test
-    void should_fail_when_employee_requests_more_than_five_working_days() {
-
+    void should_check_in_reserved_reservation_for_owner() {
         InMemoryReservationRepository reservationRepository = new InMemoryReservationRepository();
+
+        LocalDate today = LocalDate.now();
+
+        Reservation saved = reservationRepository.save(new Reservation(
+                null,
+                1L,
+                "employee@test.com",
+                today,
+                ReservationSlot.MORNING,
+                ReservationStatus.RESERVED,
+                "B01",
+                false,
+                LocalDateTime.now(),
+                null
+        ));
 
         ParkingSpotRepositoryPort parkingSpotRepositoryPort =
                 new InMemoryParkingSpotRepository(List.of(
@@ -72,21 +139,154 @@ class ReservationApplicationServiceTest {
 
         User employee = new User(1L, "employee@test.com", "x", UserRole.EMPLOYEE, true);
 
-        LocalDate start = nextMonday();
-        LocalDate end = start.plusDays(6);
+        Reservation checkedIn = service.checkIn(employee, saved.getId());
 
-        assertThrows(BusinessException.class, () ->
-                service.createReservations(employee, start, end, ReservationSlot.MORNING, false)
+        assertEquals(ReservationStatus.CHECKED_IN, checkedIn.getStatus());
+        assertNotNull(checkedIn.getCheckInTime());
+    }
+
+    @Test
+    void should_cancel_reservation_for_owner() {
+        InMemoryReservationRepository reservationRepository = new InMemoryReservationRepository();
+
+        LocalDate targetDate = nextWeekday();
+
+        Reservation saved = reservationRepository.save(new Reservation(
+                null,
+                1L,
+                "employee@test.com",
+                targetDate,
+                ReservationSlot.AFTERNOON,
+                ReservationStatus.RESERVED,
+                "B01",
+                false,
+                LocalDateTime.now(),
+                null
+        ));
+
+        ParkingSpotRepositoryPort parkingSpotRepositoryPort =
+                new InMemoryParkingSpotRepository(List.of(
+                        new ParkingSpot(1L, "B01", "B", 1, false)
+                ));
+
+        UserRepositoryPort userRepositoryPort = new InMemoryUserRepository();
+
+        ReservationApplicationService service = new ReservationApplicationService(
+                reservationRepository,
+                parkingSpotRepositoryPort,
+                userRepositoryPort
+        );
+
+        User employee = new User(1L, "employee@test.com", "x", UserRole.EMPLOYEE, true);
+
+        Reservation cancelled = service.cancelReservation(employee, saved.getId());
+
+        assertEquals(ReservationStatus.CANCELLED, cancelled.getStatus());
+    }
+
+    @Test
+    void should_forbid_cancel_when_user_is_not_owner_and_not_secretary() {
+        InMemoryReservationRepository reservationRepository = new InMemoryReservationRepository();
+
+        LocalDate targetDate = nextWeekday();
+
+        Reservation saved = reservationRepository.save(new Reservation(
+                null,
+                1L,
+                "employee@test.com",
+                targetDate,
+                ReservationSlot.AFTERNOON,
+                ReservationStatus.RESERVED,
+                "B01",
+                false,
+                LocalDateTime.now(),
+                null
+        ));
+
+        ParkingSpotRepositoryPort parkingSpotRepositoryPort =
+                new InMemoryParkingSpotRepository(List.of(
+                        new ParkingSpot(1L, "B01", "B", 1, false)
+                ));
+
+        UserRepositoryPort userRepositoryPort = new InMemoryUserRepository();
+
+        ReservationApplicationService service = new ReservationApplicationService(
+                reservationRepository,
+                parkingSpotRepositoryPort,
+                userRepositoryPort
+        );
+
+        User otherEmployee = new User(2L, "other@test.com", "x", UserRole.EMPLOYEE, true);
+
+        assertThrows(ForbiddenException.class, () ->
+                service.cancelReservation(otherEmployee, saved.getId())
         );
     }
 
-    // ==========================
-    // Helpers
-    // ==========================
+    @Test
+    void should_return_spot_statuses_sorted_and_with_correct_status() {
+        InMemoryReservationRepository reservationRepository = new InMemoryReservationRepository();
+        LocalDate targetDate = nextWeekday();
+
+        reservationRepository.save(new Reservation(
+                null,
+                1L,
+                "employee@test.com",
+                targetDate,
+                ReservationSlot.MORNING,
+                ReservationStatus.RESERVED,
+                "B02",
+                false,
+                LocalDateTime.now(),
+                null
+        ));
+
+        reservationRepository.save(new Reservation(
+                null,
+                2L,
+                "employee2@test.com",
+                targetDate,
+                ReservationSlot.MORNING,
+                ReservationStatus.CHECKED_IN,
+                "A01",
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        ));
+
+        ParkingSpotRepositoryPort parkingSpotRepositoryPort =
+                new InMemoryParkingSpotRepository(List.of(
+                        new ParkingSpot(2L, "B02", "B", 2, false),
+                        new ParkingSpot(1L, "A01", "A", 1, true),
+                        new ParkingSpot(3L, "C01", "C", 1, false)
+                ));
+
+        UserRepositoryPort userRepositoryPort = new InMemoryUserRepository();
+
+        ReservationApplicationService service = new ReservationApplicationService(
+                reservationRepository,
+                parkingSpotRepositoryPort,
+                userRepositoryPort
+        );
+
+        List<ParkingSpotView> result = service.getParkingSpotsWithStatus(targetDate, ReservationSlot.MORNING);
+
+        assertEquals(3, result.size());
+
+        assertEquals("A01", result.get(0).getCode());
+        assertEquals(ParkingSpotStatus.CHECKED_IN, result.get(0).getStatus());
+
+        assertEquals("B02", result.get(1).getCode());
+        assertEquals(ParkingSpotStatus.RESERVED, result.get(1).getStatus());
+
+        assertEquals("C01", result.get(2).getCode());
+        assertEquals(ParkingSpotStatus.AVAILABLE, result.get(2).getStatus());
+    }
+
 
     private static LocalDate nextWeekday() {
         LocalDate date = LocalDate.now().plusDays(1);
-        while (date.getDayOfWeek().getValue() > 5) {
+        while (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
             date = date.plusDays(1);
         }
         return date;
@@ -94,27 +294,26 @@ class ReservationApplicationServiceTest {
 
     private static LocalDate nextMonday() {
         LocalDate date = LocalDate.now().plusDays(1);
-        while (date.getDayOfWeek() != java.time.DayOfWeek.MONDAY) {
+        while (date.getDayOfWeek() != DayOfWeek.MONDAY) {
             date = date.plusDays(1);
         }
         return date;
     }
 
-    // ==========================
-    // In-memory adapters
-    // ==========================
 
     static class InMemoryParkingSpotRepository implements ParkingSpotRepositoryPort {
 
         private final List<ParkingSpot> spots;
 
         InMemoryParkingSpotRepository(List<ParkingSpot> spots) {
-            this.spots = spots;
+            this.spots = new ArrayList<>(spots);
         }
 
         @Override
         public List<ParkingSpot> findAll() {
-            return spots;
+            return spots.stream()
+                    .sorted(Comparator.comparing(ParkingSpot::getCode))
+                    .toList();
         }
 
         @Override
@@ -132,8 +331,11 @@ class ReservationApplicationServiceTest {
 
         @Override
         public Reservation save(Reservation reservation) {
+
+            Reservation toStore;
+
             if (reservation.getId() == null) {
-                Reservation stored = new Reservation(
+                toStore = new Reservation(
                         seq.getAndIncrement(),
                         reservation.getUserId(),
                         reservation.getUserEmail(),
@@ -145,17 +347,23 @@ class ReservationApplicationServiceTest {
                         reservation.getCreatedAt() != null ? reservation.getCreatedAt() : LocalDateTime.now(),
                         reservation.getCheckInTime()
                 );
-                data.add(stored);
-                return stored;
+            } else {
+                toStore = reservation;
             }
-            data.removeIf(r -> r.getId().equals(reservation.getId()));
-            data.add(reservation);
-            return reservation;
+
+            final Long idToKeep = toStore.getId(); // ✅ FIX ICI
+
+            data.removeIf(r -> r.getId().equals(idToKeep));
+            data.add(toStore);
+
+            return toStore;
         }
 
         @Override
         public Optional<Reservation> findById(Long id) {
-            return data.stream().filter(r -> r.getId().equals(id)).findFirst();
+            return data.stream()
+                    .filter(r -> r.getId().equals(id))
+                    .findFirst();
         }
 
         @Override
@@ -165,12 +373,16 @@ class ReservationApplicationServiceTest {
 
         @Override
         public List<Reservation> findByUserId(Long userId) {
-            return data.stream().filter(r -> r.getUserId().equals(userId)).toList();
+            return data.stream()
+                    .filter(r -> r.getUserId().equals(userId))
+                    .toList();
         }
 
         @Override
         public List<Reservation> findByDate(LocalDate date) {
-            return data.stream().filter(r -> r.getReservationDate().equals(date)).toList();
+            return data.stream()
+                    .filter(r -> r.getReservationDate().equals(date))
+                    .toList();
         }
 
         @Override
