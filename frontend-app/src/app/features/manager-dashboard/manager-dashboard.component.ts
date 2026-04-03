@@ -11,6 +11,7 @@ import { DashboardMetrics } from '../../core/models/api.models';
   styleUrl: './manager-dashboard.component.scss'
 })
 export class ManagerDashboardComponent implements OnInit {
+
   metrics = signal<DashboardMetrics | null>(null);
   loading = signal(false);
   error = signal('');
@@ -18,7 +19,12 @@ export class ManagerDashboardComponent implements OnInit {
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
+    this.loadDashboard();
+  }
+
+  private loadDashboard(): void {
     this.loading.set(true);
+    this.error.set('');
 
     this.api.getManagerDashboard().subscribe({
       next: (metrics) => {

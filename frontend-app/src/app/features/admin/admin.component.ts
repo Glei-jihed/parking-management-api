@@ -2,7 +2,13 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
-import { Reservation, ReservationSlot, ReservationStatus, User, UserRole } from '../../core/models/api.models';
+import {
+  Reservation,
+  ReservationSlot,
+  ReservationStatus,
+  User,
+  UserRole
+} from '../../core/models/api.models';
 
 @Component({
   selector: 'app-admin',
@@ -12,11 +18,17 @@ import { Reservation, ReservationSlot, ReservationStatus, User, UserRole } from 
   styleUrl: './admin.component.scss'
 })
 export class AdminComponent implements OnInit {
+
   users = signal<User[]>([]);
   reservations = signal<Reservation[]>([]);
+
   loading = signal(false);
   error = signal('');
   success = signal('');
+
+  roles: UserRole[] = ['EMPLOYEE', 'SECRETARY', 'MANAGER'];
+  slots: ReservationSlot[] = ['MORNING', 'AFTERNOON', 'FULL_DAY'];
+  statuses: ReservationStatus[] = ['RESERVED', 'CHECKED_IN', 'RELEASED', 'CANCELLED'];
 
   newUser = {
     email: '',
@@ -38,10 +50,6 @@ export class AdminComponent implements OnInit {
   editReservationStatus: ReservationStatus = 'RESERVED';
   editReservationElectric = false;
 
-  roles: UserRole[] = ['EMPLOYEE', 'SECRETARY', 'MANAGER'];
-  slots: ReservationSlot[] = ['MORNING', 'AFTERNOON', 'FULL_DAY'];
-  statuses: ReservationStatus[] = ['RESERVED', 'CHECKED_IN', 'RELEASED', 'CANCELLED'];
-
   constructor(private api: ApiService) {}
 
   ngOnInit(): void {
@@ -49,21 +57,21 @@ export class AdminComponent implements OnInit {
   }
 
   reload(): void {
-    this.clearMessages();
     this.loading.set(true);
+    this.clearMessages();
 
     this.api.getUsers().subscribe({
       next: (users) => this.users.set(users),
-      error: (err) => this.error.set(err?.error?.message || 'Unable to load users')
+      error: () => this.error.set('Unable to load users')
     });
 
     this.api.getAdminReservations().subscribe({
-      next: (reservations) => {
-        this.reservations.set(reservations);
+      next: (res) => {
+        this.reservations.set(res);
         this.loading.set(false);
       },
-      error: (err) => {
-        this.error.set(err?.error?.message || 'Unable to load reservations');
+      error: () => {
+        this.error.set('Unable to load reservations');
         this.loading.set(false);
       }
     });
@@ -78,19 +86,14 @@ export class AdminComponent implements OnInit {
         this.newUser = { email: '', password: 'password', role: 'EMPLOYEE' };
         this.reload();
       },
-      error: (err) => this.error.set(err?.error?.message || 'User creation failed')
+      error: () => this.error.set('User creation failed')
     });
   }
 
   toggleUser(user: User): void {
-    this.clearMessages();
-
     this.api.toggleUserActive(user.id, !user.active).subscribe({
-      next: () => {
-        this.success.set('User updated');
-        this.reload();
-      },
-      error: (err) => this.error.set(err?.error?.message || 'User update failed')
+      next: () => this.reload(),
+      error: () => this.error.set('User update failed')
     });
   }
 
@@ -104,27 +107,23 @@ export class AdminComponent implements OnInit {
       needsElectric: this.adminReservation.needsElectric
     }).subscribe({
       next: () => {
-        this.success.set('Admin reservation created');
+        this.success.set('Reservation created');
         this.reload();
       },
-      error: (err) => this.error.set(err?.error?.message || 'Reservation creation failed')
+      error: () => this.error.set('Reservation failed')
     });
   }
 
-  startEdit(reservation: Reservation): void {
-    this.editReservationId = reservation.id;
-    this.editReservationDate = reservation.reservationDate;
-    this.editReservationSlot = reservation.slot;
-    this.editReservationStatus = reservation.status;
-    this.editReservationElectric = reservation.electricRequired;
+  startEdit(r: Reservation): void {
+    this.editReservationId = r.id;
+    this.editReservationDate = r.reservationDate;
+    this.editReservationSlot = r.slot;
+    this.editReservationStatus = r.status;
+    this.editReservationElectric = r.electricRequired;
   }
 
   saveEdit(): void {
-    if (!this.editReservationId) {
-      return;
-    }
-
-    this.clearMessages();
+    if (!this.editReservationId) return;
 
     this.api.updateAdminReservation(this.editReservationId, {
       reservationDate: this.editReservationDate,
@@ -133,23 +132,18 @@ export class AdminComponent implements OnInit {
       electricRequired: this.editReservationElectric
     }).subscribe({
       next: () => {
-        this.success.set('Reservation updated');
+        this.success.set('Updated');
         this.editReservationId = null;
         this.reload();
       },
-      error: (err) => this.error.set(err?.error?.message || 'Reservation update failed')
+      error: () => this.error.set('Update failed')
     });
   }
 
   cancelAdminReservation(id: number): void {
-    this.clearMessages();
-
     this.api.cancelAdminReservation(id).subscribe({
-      next: () => {
-        this.success.set('Reservation cancelled');
-        this.reload();
-      },
-      error: (err) => this.error.set(err?.error?.message || 'Cancellation failed')
+      next: () => this.reload(),
+      error: () => this.error.set('Cancel failed')
     });
   }
 
@@ -157,7 +151,6 @@ export class AdminComponent implements OnInit {
     switch (status) {
       case 'RESERVED': return 'badge badge-orange';
       case 'CHECKED_IN': return 'badge badge-blue';
-      case 'RELEASED': return 'badge badge-red';
       case 'CANCELLED': return 'badge badge-red';
       default: return 'badge';
     }

@@ -1,27 +1,59 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .panel {
-  padding: 20px;
+  padding: 24px;
 }
 
-.panel h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.field input,
+.field select {
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
 }
 
 .checkbox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.badge-orange { background: #fef3c7; }
+.badge-blue { background: #dbeafe; }
+.badge-red { background: #fee2e2; }
+
+.full-width {
+  width: 100%;
 }

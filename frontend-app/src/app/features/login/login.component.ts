@@ -12,8 +12,10 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
+
   email = 'employee@parking.local';
   password = 'password';
+
   loading = signal(false);
   error = signal('');
 
@@ -23,11 +25,16 @@ export class LoginComponent {
   ) {}
 
   submit(): void {
+    if (!this.email || !this.password) {
+      this.error.set('Please fill all fields');
+      return;
+    }
+
     this.loading.set(true);
     this.error.set('');
 
     this.auth.login({
-      email: this.email,
+      email: this.email.trim(),
       password: this.password
     }).subscribe({
       next: () => {
@@ -36,7 +43,7 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading.set(false);
-        this.error.set(err?.error?.message || 'Login failed');
+        this.error.set(err?.error?.message || 'Invalid credentials');
       }
     });
   }

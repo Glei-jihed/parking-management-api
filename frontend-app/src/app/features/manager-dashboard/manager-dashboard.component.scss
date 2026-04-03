@@ -1,17 +1,87 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2563eb;
+  margin: 0;
+}
+
+.section-title {
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
 }
 
 .panel {
+  padding: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
   padding: 20px;
+  border-radius: 16px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.stat-value.electric {
+  color: #7c3aed;
+}
+
+.second-row {
+  gap: 16px;
 }
 
 .panel h2 {
   margin-top: 0;
+  margin-bottom: 10px;
 }
 
-.second-row {
-  margin-top: 0;
+.panel ul {
+  padding-left: 18px;
+  margin: 0;
+  color: #4b5563;
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 500px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }

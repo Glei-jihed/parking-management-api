@@ -1,44 +1,76 @@
 <div class="container page">
-  <h1 class="section-title">Manager dashboard</h1>
+
+  <header class="header">
+    <div>
+      <p class="eyebrow">Manager space</p>
+      <h1 class="section-title">Dashboard</h1>
+      <p class="subtitle">
+        Monitor parking usage and activity in real time.
+      </p>
+    </div>
+  </header>
 
   <!-- ERROR -->
   @if (error()) {
-  <div class="message error">{{ error() }}</div>
+    <div class="message error">{{ error() }}</div>
   }
 
   <!-- LOADING -->
   @if (loading()) {
-  <div class="card panel">
-    Loading dashboard...
-  </div>
+    <div class="card panel">
+      Loading dashboard...
+    </div>
   }
 
   <!-- DATA -->
   @if (!loading() && metrics()) {
 
-  <section class="stats-grid">
+    <section class="stats-grid">
 
-    <div class="card stat-card">
-      <span class="stat-label">Total spots</span>
-      <strong class="stat-value">{{ metrics()!.totalSpots }}</strong>
-    </div>
+      <article class="card stat-card">
+        <span class="stat-label">Total spots</span>
+        <strong class="stat-value">{{ metrics()!.totalSpots }}</strong>
+      </article>
 
-    <div class="card stat-card">
-      <span class="stat-label">Electric spots</span>
-      <strong class="stat-value">{{ metrics()!.electricSpots }}</strong>
-    </div>
+      <article class="card stat-card">
+        <span class="stat-label">Electric spots</span>
+        <strong class="stat-value electric">{{ metrics()!.electricSpots }}</strong>
+      </article>
 
-    <div class="card stat-card">
-      <span class="stat-label">Users (30d)</span>
-      <strong class="stat-value">{{ metrics()!.distinctUsersLast30Days }}</strong>
-    </div>
+      <article class="card stat-card">
+        <span class="stat-label">Users (30 days)</span>
+        <strong class="stat-value">{{ metrics()!.distinctUsersLast30Days }}</strong>
+      </article>
 
-    <div class="card stat-card">
-      <span class="stat-label">Reservations</span>
-      <strong class="stat-value">{{ metrics()!.totalReservationsLast30Days }}</strong>
-    </div>
+      <article class="card stat-card">
+        <span class="stat-label">Reservations (30 days)</span>
+        <strong class="stat-value">{{ metrics()!.totalReservationsLast30Days }}</strong>
+      </article>
 
-  </section>
+    </section>
+
+    <!-- SECOND ROW -->
+    <section class="grid grid-2 second-row">
+
+      <div class="card panel">
+        <h2>System overview</h2>
+        <p>
+          This dashboard provides a global view of parking usage, helping managers
+          understand occupancy and optimize space allocation.
+        </p>
+      </div>
+
+      <div class="card panel">
+        <h2>Key insights</h2>
+        <ul>
+          <li>Monitor usage trends over the last 30 days</li>
+          <li>Track electric vehicle adoption</li>
+          <li>Identify peak reservation periods</li>
+        </ul>
+      </div>
+
+    </section>
 
   }
+
 </div>

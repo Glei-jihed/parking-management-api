@@ -1,5 +1,12 @@
 <div class="container page">
-  <h1 class="section-title">Secretary back office</h1>
+
+  <header class="header">
+    <div>
+      <p class="eyebrow">Secretary space</p>
+      <h1 class="section-title">Back office</h1>
+      <p class="subtitle">Manage users and reservations easily.</p>
+    </div>
+  </header>
 
   @if (success()) {
     <div class="message success">{{ success() }}</div>
@@ -9,7 +16,10 @@
     <div class="message error">{{ error() }}</div>
   }
 
+  <!-- FORMS -->
   <section class="grid grid-2">
+
+    <!-- CREATE USER -->
     <div class="card panel">
       <h2>Create user</h2>
 
@@ -32,18 +42,19 @@
         </select>
       </div>
 
-      <button class="btn btn-primary" (click)="createUser()">Create user</button>
+      <button class="btn btn-primary full-width" (click)="createUser()">Create</button>
     </div>
 
+    <!-- CREATE RESERVATION -->
     <div class="card panel">
-      <h2>Create reservation as secretary</h2>
+      <h2>Create reservation</h2>
 
       <div class="field">
         <label>User</label>
         <select [(ngModel)]="adminReservation.userId">
-          <option [ngValue]="0">Select a user</option>
+          <option [ngValue]="0">Select</option>
           @for (user of users(); track user.id) {
-            <option [ngValue]="user.id">{{ user.email }} - {{ user.role }}</option>
+            <option [ngValue]="user.id">{{ user.email }}</option>
           }
         </select>
       </div>
@@ -66,125 +77,77 @@
 
       <label class="checkbox">
         <input [(ngModel)]="adminReservation.needsElectric" type="checkbox" />
-        Electric / hybrid spot required
+        Electric spot
       </label>
 
-      <button class="btn btn-primary" (click)="createAdminReservation()">Create reservation</button>
+      <button class="btn btn-primary full-width" (click)="createAdminReservation()">Reserve</button>
     </div>
+
   </section>
 
+  <!-- USERS -->
   <section class="card panel">
     <h2>Users</h2>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>Email</th>
-          <th>Role</th>
-          <th>Active</th>
-          <th>Action</th>
-        </tr>
-        </thead>
-        <tbody>
-          @for (user of users(); track user.id) {
-            <tr>
-              <td>{{ user.id }}</td>
-              <td>{{ user.email }}</td>
-              <td>{{ user.role }}</td>
-              <td>{{ user.active ? 'Yes' : 'No' }}</td>
-              <td>
-                <button class="btn btn-outline" (click)="toggleUser(user)">
-                  {{ user.active ? 'Deactivate' : 'Activate' }}
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ user.active ? 'Active' : 'Inactive' }}</td>
+            <td>
+              <button class="btn btn-outline" (click)="toggleUser(user)">
+                Toggle
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </section>
 
+  <!-- RESERVATIONS -->
   <section class="card panel">
     <h2>Reservations</h2>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-        <tr>
-          <th>ID</th>
-          <th>User</th>
-          <th>Date</th>
-          <th>Slot</th>
-          <th>Status</th>
-          <th>Spot</th>
-          <th>Electric</th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-          @for (reservation of reservations(); track reservation.id) {
-            <tr>
-              <td>{{ reservation.id }}</td>
-              <td>{{ reservation.userEmail }}</td>
-              <td>{{ reservation.reservationDate }}</td>
-              <td>{{ reservation.slot }}</td>
-              <td><span [class]="statusClass(reservation.status)">{{ reservation.status }}</span></td>
-              <td>{{ reservation.parkingSpotCode }}</td>
-              <td>{{ reservation.electricRequired ? 'Yes' : 'No' }}</td>
-              <td class="actions">
-                <button class="btn btn-outline" (click)="startEdit(reservation)">Edit</button>
-                <button class="btn btn-danger" (click)="cancelAdminReservation(reservation.id)">Cancel</button>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+      <tr>
+        <th>User</th>
+        <th>Date</th>
+        <th>Slot</th>
+        <th>Status</th>
+        <th>Spot</th>
+        <th></th>
+      </tr>
+      </thead>
+
+      <tbody>
+        @for (r of reservations(); track r.id) {
+          <tr>
+            <td>{{ r.userEmail }}</td>
+            <td>{{ r.reservationDate }}</td>
+            <td>{{ r.slot }}</td>
+            <td><span [class]="statusClass(r.status)">{{ r.status }}</span></td>
+            <td>{{ r.parkingSpotCode }}</td>
+            <td>
+              <button class="btn btn-danger" (click)="cancelAdminReservation(r.id)">
+                Cancel
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </section>
 
-  @if (editReservationId) {
-    <section class="card panel">
-      <h2>Edit reservation #{{ editReservationId }}</h2>
-
-      <div class="grid grid-2">
-        <div class="field">
-          <label>Date</label>
-          <input [(ngModel)]="editReservationDate" type="date" />
-        </div>
-
-        <div class="field">
-          <label>Slot</label>
-          <select [(ngModel)]="editReservationSlot">
-            @for (slot of slots; track slot) {
-              <option [value]="slot">{{ slot }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Status</label>
-          <select [(ngModel)]="editReservationStatus">
-            @for (status of statuses; track status) {
-              <option [value]="status">{{ status }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Electric</label>
-          <select [(ngModel)]="editReservationElectric">
-            <option [ngValue]="true">Yes</option>
-            <option [ngValue]="false">No</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-primary" (click)="saveEdit()">Save</button>
-        <button class="btn btn-outline" (click)="editReservationId = null">Close</button>
-      </div>
-    </section>
-  }
 </div>

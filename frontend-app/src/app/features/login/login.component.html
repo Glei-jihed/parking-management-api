@@ -1,32 +1,53 @@
-<div class="container login-page">
-  <div class="card login-card">
-    <p class="eyebrow">Parking Reservation System</p>
-    <h1>Login</h1>
-    <p class="subtitle">Connect with your parking account.</p>
+<div class="login-page">
 
-    <div class="field">
-      <label>Email</label>
-      <input [(ngModel)]="email" type="email" />
+  <div class="login-card">
+
+    <div class="login-header">
+      <p class="eyebrow">Parking Management</p>
+      <h1>Sign in</h1>
+      <p class="subtitle">
+        Access your dashboard and manage your parking reservations.
+      </p>
     </div>
-
-    <div class="field">
-      <label>Password</label>
-      <input [(ngModel)]="password" type="password" />
-    </div>
-
-    <button class="btn btn-primary full-width" (click)="submit()" [disabled]="loading()">
-      {{ loading() ? 'Signing in...' : 'Login' }}
-    </button>
 
     @if (error()) {
       <div class="message error">{{ error() }}</div>
     }
 
-    <div class="demo-box">
-      <strong>Demo accounts</strong>
-      <p>employee@parking.local / password</p>
-      <p>secretary@parking.local / password</p>
-      <p>manager@parking.local / password</p>
-    </div>
+    <form (submit)="submit(); $event.preventDefault()" class="login-form">
+
+      <div class="field">
+        <label>Email</label>
+        <input
+          type="email"
+          placeholder="your@email.com"
+          [(ngModel)]="email"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <input
+          type="password"
+          placeholder="••••••••"
+          [(ngModel)]="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <button
+        class="btn btn-primary login-btn"
+        type="submit"
+        [disabled]="loading()"
+      >
+        {{ loading() ? 'Signing in...' : 'Login' }}
+      </button>
+
+    </form>
+
   </div>
+
 </div>
