@@ -1,52 +1,72 @@
 <div class="container page">
   <header class="header">
-    <div>
+    <div class="header-copy">
       <p class="eyebrow">Employee space</p>
       <h1 class="section-title">My parking dashboard</h1>
-      <p class="subtitle">Reserve a parking spot, check in, and track your reservations.</p>
+      <p class="subtitle">
+        Reserve a parking spot, track availability, and manage your reservations.
+      </p>
     </div>
 
     <div class="card backend-card">
       <span class="stat-label">Backend</span>
-      <strong class="stat-value">{{ backendStatus() }}</strong>
+      <strong
+        class="stat-value"
+        [class.status-up]="backendStatus() === 'UP'"
+        [class.status-down]="backendStatus() !== 'UP'"
+      >
+        {{ backendStatus() }}
+      </strong>
     </div>
   </header>
 
   @if (success()) {
-    <div class="message success">{{ success() }}</div>
+  <div class="message success">{{ success() }}</div>
   }
 
   @if (error()) {
-    <div class="message error">{{ error() }}</div>
+  <div class="message error">{{ error() }}</div>
   }
 
   <section class="stats-grid">
     <article class="card stat-card">
-      <span class="stat-label">Total spots</span>
-      <strong class="stat-value">{{ parkingSpots().length }}</strong>
+      <span class="stat-label">Visible spots</span>
+      <strong class="stat-value">{{ getVisibleSpotCount() }}</strong>
     </article>
 
     <article class="card stat-card">
       <span class="stat-label">Available</span>
-      <strong class="stat-value">{{ getAvailableCount() }}</strong>
+      <strong class="stat-value text-green">{{ getAvailableCount() }}</strong>
     </article>
 
     <article class="card stat-card">
       <span class="stat-label">Reserved</span>
-      <strong class="stat-value">{{ getReservedCount() }}</strong>
+      <strong class="stat-value text-orange">{{ getReservedCount() }}</strong>
     </article>
 
     <article class="card stat-card">
       <span class="stat-label">Checked-in</span>
-      <strong class="stat-value">{{ getCheckedInCount() }}</strong>
+      <strong class="stat-value text-blue">{{ getCheckedInCount() }}</strong>
+    </article>
+
+    <article class="card stat-card">
+      <span class="stat-label">Electric available</span>
+      <strong class="stat-value text-purple">{{ getAvailableElectricCount() }}</strong>
     </article>
   </section>
 
   <section class="grid grid-2 main-grid">
     <div class="card panel">
-      <h2>Reserve a spot</h2>
+      <div class="panel-header">
+        <div>
+          <h2>Reserve a spot</h2>
+          <p class="panel-subtitle">
+            The backend assigns a compatible available spot automatically.
+          </p>
+        </div>
+      </div>
 
-      <div class="grid grid-2">
+      <div class="grid grid-2 form-grid">
         <div class="field">
           <label>Date</label>
           <input type="date" [value]="selectedDate()" (change)="onDateChange($event)" />
@@ -63,11 +83,23 @@
       </div>
 
       <label class="checkbox">
-        <input type="checkbox" [checked]="needsElectric()" (change)="onElectricChange($event)" />
-        I need an electric / hybrid spot
+        <input
+          type="checkbox"
+          [checked]="needsElectric()"
+          (change)="onElectricChange($event)"
+        />
+        <span>I need an electric / hybrid spot</span>
       </label>
 
-      <button class="btn btn-primary" (click)="reserve()">Create reservation</button>
+      <div class="reservation-actions">
+        <button
+          class="btn btn-primary"
+          (click)="reserve()"
+          [disabled]="creatingReservation() || getAvailableCount() === 0"
+        >
+          {{ creatingReservation() ? 'Creating...' : 'Create reservation' }}
+        </button>
+      </div>
 
       <div class="message-box">
         <strong>Rule reminders</strong>
@@ -81,74 +113,102 @@
     </div>
 
     <div class="card panel">
-      <h2>Parking availability</h2>
+      <div class="panel-header">
+        <div>
+          <h2>Parking availability</h2>
+          <p class="panel-subtitle">
+            @if (needsElectric()) {
+            Showing only electric-compatible spots.
+            } @else {
+            Showing all spots for the selected date and slot.
+            }
+          </p>
+        </div>
+      </div>
 
       @if (loadingSpots()) {
-        <p>Loading parking spots...</p>
+      <div class="empty-state">Loading parking spots...</div>
+      } @else if (filteredParkingSpots().length === 0) {
+      <div class="empty-state">No spots match the current filter.</div>
       } @else {
-        <div class="spots-grid">
-          @for (spot of parkingSpots(); track spot.code) {
-            <article class="spot-card" [class.electric]="spot.electric">
-              <div class="spot-top">
-                <strong>{{ spot.code }}</strong>
-                @if (spot.electric) {
-                  <span class="badge badge-purple">Electric</span>
-                }
-              </div>
+      <div class="spots-grid">
+        @for (spot of filteredParkingSpots(); track spot.code) {
+        <article
+          class="spot-card"
+          [class.electric]="spot.electric"
+          [class.available-card]="spot.status === 'AVAILABLE'"
+          [class.reserved-card]="spot.status === 'RESERVED'"
+          [class.checked-card]="spot.status === 'CHECKED_IN'"
+        >
+          <div class="spot-top">
+            <strong>{{ spot.code }}</strong>
+            @if (spot.electric) {
+            <span class="badge badge-purple">Electric</span>
+            }
+          </div>
 
-              <div class="spot-meta">Row {{ spot.rowLabel }} · Spot {{ spot.spotNumber }}</div>
+          <div class="spot-meta">Row {{ spot.rowLabel }} · Spot {{ spot.spotNumber }}</div>
 
-              <span [class]="statusClass(spot.status)">
+          <span [class]="statusClass(spot.status)">
                 {{ spot.status }}
               </span>
-            </article>
-          }
-        </div>
+        </article>
+        }
+      </div>
       }
     </div>
   </section>
 
   <section class="card panel">
-    <h2>My reservations</h2>
+    <div class="panel-header">
+      <div>
+        <h2>My reservations</h2>
+        <p class="panel-subtitle">Review your future and current reservations.</p>
+      </div>
+    </div>
 
     @if (loadingReservations()) {
-      <p>Loading reservations...</p>
+    <div class="empty-state">Loading reservations...</div>
+    } @else if (myReservations().length === 0) {
+    <div class="empty-state">You do not have any reservation yet.</div>
     } @else {
-      <div class="table-wrapper">
-        <table>
-          <thead>
-          <tr>
-            <th>Date</th>
-            <th>Slot</th>
-            <th>Status</th>
-            <th>Spot</th>
-            <th>Electric</th>
-            <th>Check-in</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-            @for (reservation of myReservations(); track reservation.id) {
-              <tr>
-                <td>{{ reservation.reservationDate }}</td>
-                <td>{{ reservation.slot }}</td>
-                <td>
-                  <span [class]="statusClass(reservation.status)">{{ reservation.status }}</span>
-                </td>
-                <td>{{ reservation.parkingSpotCode }}</td>
-                <td>{{ reservation.electricRequired ? 'Yes' : 'No' }}</td>
-                <td>{{ reservation.checkInTime || '-' }}</td>
-                <td class="actions">
-                  @if (reservation.status === 'RESERVED') {
-                    <button class="btn btn-success" (click)="checkIn(reservation.id)">Check-in</button>
-                    <button class="btn btn-danger" (click)="cancelReservation(reservation.id)">Cancel</button>
-                  }
-                </td>
-              </tr>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Slot</th>
+          <th>Status</th>
+          <th>Spot</th>
+          <th>Electric</th>
+          <th>Check-in</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @for (reservation of myReservations(); track reservation.id) {
+        <tr>
+          <td>{{ reservation.reservationDate }}</td>
+          <td>{{ reservation.slot }}</td>
+          <td>
+            <span [class]="statusClass(reservation.status)">{{ reservation.status }}</span>
+          </td>
+          <td>{{ reservation.parkingSpotCode }}</td>
+          <td>{{ reservation.electricRequired ? 'Yes' : 'No' }}</td>
+          <td>{{ reservation.checkInTime || '-' }}</td>
+          <td class="actions">
+            @if (canCheckIn(reservation)) {
+            <button class="btn btn-success" (click)="checkIn(reservation.id)">Check-in</button>
+            <button class="btn btn-danger" (click)="cancelReservation(reservation.id)">Cancel</button>
+            } @else {
+            <span class="muted">No action</span>
             }
-          </tbody>
-        </table>
-      </div>
+          </td>
+        </tr>
+        }
+        </tbody>
+      </table>
+    </div>
     }
   </section>
 </div>

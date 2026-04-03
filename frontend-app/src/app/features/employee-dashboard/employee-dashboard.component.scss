@@ -1,38 +1,241 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  padding-top: 8px;
+  padding-bottom: 24px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
   align-items: flex-start;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
+.header-copy {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2563eb;
+}
+
+.section-title {
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
 .backend-card {
-  padding: 20px;
   min-width: 180px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-up {
+  color: #15803d;
+}
+
+.status-down {
+  color: #b91c1c;
+}
+
+.stat-card {
+  padding: 20px;
+}
+
+.text-green {
+  color: #15803d;
+}
+
+.text-orange {
+  color: #b45309;
+}
+
+.text-blue {
+  color: #1d4ed8;
+}
+
+.text-purple {
+  color: #7e22ce;
+}
+
+.main-grid {
+  align-items: start;
 }
 
 .panel {
-  padding: 20px;
+  padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-header h2 {
+  margin: 0 0 6px;
+}
+
+.panel-subtitle {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.form-grid {
+  margin-bottom: 16px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 18px;
+  font-weight: 500;
+}
+
+.reservation-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.message-box {
+  padding: 16px 18px;
+  background: #f9fafb;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.message-box strong {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.message-box ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #4b5563;
+  line-height: 1.7;
 }
 
 .spots-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .spot-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  padding: 14px;
+  border-radius: 16px;
+  padding: 16px;
+  background: #ffffff;
+  min-height: 120px;
 }
 
 .spot-card.electric {
   border: 2px solid #a855f7;
+}
+
+.available-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.reserved-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+}
+
+.checked-card {
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+}
+
+.spot-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.spot-meta {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.empty-state {
+  padding: 18px;
+  border-radius: 14px;
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  color: #6b7280;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  min-width: 860px;
+}
+
+th,
+td {
+  white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .spots-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .spots-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .spots-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .backend-card {
+    width: 100%;
+  }
 }

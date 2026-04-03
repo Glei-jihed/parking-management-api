@@ -19,6 +19,7 @@ export class EmployeeDashboardComponent implements OnInit {
 
   loadingSpots = signal(false);
   loadingReservations = signal(false);
+  creatingReservation = signal(false);
 
   parkingSpots = signal<ParkingSpot[]>([]);
   myReservations = signal<Reservation[]>([]);
@@ -46,10 +47,12 @@ export class EmployeeDashboardComponent implements OnInit {
 
   onElectricChange(event: Event): void {
     this.needsElectric.set((event.target as HTMLInputElement).checked);
+    this.loadParkingSpots();
   }
 
   reserve(): void {
     this.clearMessages();
+    this.creatingReservation.set(true);
 
     this.api.createReservation({
       startDate: this.selectedDate(),
@@ -58,12 +61,14 @@ export class EmployeeDashboardComponent implements OnInit {
       needsElectric: this.needsElectric()
     }).subscribe({
       next: () => {
-        this.success.set('Reservation created successfully');
+        this.success.set('Reservation created successfully.');
+        this.creatingReservation.set(false);
         this.loadParkingSpots();
         this.loadMyReservations();
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'Reservation failed');
+        this.error.set(err?.error?.message || 'Reservation failed.');
+        this.creatingReservation.set(false);
       }
     });
   }
@@ -73,12 +78,12 @@ export class EmployeeDashboardComponent implements OnInit {
 
     this.api.checkIn(reservationId).subscribe({
       next: () => {
-        this.success.set('Check-in completed');
+        this.success.set('Check-in completed.');
         this.loadMyReservations();
         this.loadParkingSpots();
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'Check-in failed');
+        this.error.set(err?.error?.message || 'Check-in failed.');
       }
     });
   }
@@ -88,37 +93,66 @@ export class EmployeeDashboardComponent implements OnInit {
 
     this.api.cancelMyReservation(reservationId).subscribe({
       next: () => {
-        this.success.set('Reservation cancelled');
+        this.success.set('Reservation cancelled.');
         this.loadMyReservations();
         this.loadParkingSpots();
       },
       error: (err) => {
-        this.error.set(err?.error?.message || 'Cancellation failed');
+        this.error.set(err?.error?.message || 'Cancellation failed.');
       }
     });
   }
 
   getAvailableCount(): number {
-    return this.parkingSpots().filter(s => s.status === 'AVAILABLE').length;
+    return this.filteredParkingSpots().filter(s => s.status === 'AVAILABLE').length;
   }
 
   getReservedCount(): number {
-    return this.parkingSpots().filter(s => s.status === 'RESERVED').length;
+    return this.filteredParkingSpots().filter(s => s.status === 'RESERVED').length;
   }
 
   getCheckedInCount(): number {
-    return this.parkingSpots().filter(s => s.status === 'CHECKED_IN').length;
+    return this.filteredParkingSpots().filter(s => s.status === 'CHECKED_IN').length;
+  }
+
+  getElectricCount(): number {
+    return this.filteredParkingSpots().filter(s => s.electric).length;
+  }
+
+  getAvailableElectricCount(): number {
+    return this.filteredParkingSpots().filter(s => s.electric && s.status === 'AVAILABLE').length;
+  }
+
+  getVisibleSpotCount(): number {
+    return this.filteredParkingSpots().length;
+  }
+
+  filteredParkingSpots(): ParkingSpot[] {
+    if (this.needsElectric()) {
+      return this.parkingSpots().filter(spot => spot.electric);
+    }
+    return this.parkingSpots();
   }
 
   statusClass(status: string): string {
     switch (status) {
-      case 'AVAILABLE': return 'badge badge-green';
-      case 'RESERVED': return 'badge badge-orange';
-      case 'CHECKED_IN': return 'badge badge-blue';
-      case 'RELEASED': return 'badge badge-red';
-      case 'CANCELLED': return 'badge badge-red';
-      default: return 'badge';
+      case 'AVAILABLE':
+        return 'badge badge-green';
+      case 'RESERVED':
+        return 'badge badge-orange';
+      case 'CHECKED_IN':
+        return 'badge badge-blue';
+      case 'RELEASED':
+        return 'badge badge-red';
+      case 'CANCELLED':
+        return 'badge badge-red';
+      default:
+        return 'badge';
     }
+  }
+
+  canCheckIn(reservation: Reservation): boolean {
+    return reservation.status === 'RESERVED';
   }
 
   private loadHealth(): void {
@@ -133,12 +167,14 @@ export class EmployeeDashboardComponent implements OnInit {
 
     this.api.getParkingSpots(this.selectedDate(), this.selectedSlot()).subscribe({
       next: (spots) => {
-        this.parkingSpots.set(spots);
+        this.parkingSpots.set(
+          [...spots].sort((a, b) => a.code.localeCompare(b.code))
+        );
         this.loadingSpots.set(false);
       },
       error: () => {
         this.loadingSpots.set(false);
-        this.error.set('Unable to load parking spots');
+        this.error.set('Unable to load parking spots.');
       }
     });
   }
@@ -157,7 +193,7 @@ export class EmployeeDashboardComponent implements OnInit {
       },
       error: () => {
         this.loadingReservations.set(false);
-        this.error.set('Unable to load reservations');
+        this.error.set('Unable to load reservations.');
       }
     });
   }
